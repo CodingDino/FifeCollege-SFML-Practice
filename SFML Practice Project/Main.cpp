@@ -2,9 +2,19 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    // Window Setup
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    sf::RenderWindow window(desktop, "SFML Practice", sf::Style::None);
+
+    // Load texture
+    sf::Texture playerTexture;
+    playerTexture.loadFromFile("Assets/Graphics/Player.png");
+
+    // Setup Sprite
+    sf::Sprite playerSprite;
+    playerSprite.setTexture(playerTexture);
+
+
 
     while (window.isOpen())
     {
@@ -14,6 +24,14 @@ int main()
         {
             if (event.type == sf::Event::Closed)
                 window.close();
+
+            if (event.type == sf::Event::KeyPressed)
+            {
+                if (event.key.code == sf::Keyboard::Escape)
+                {
+                    window.close();
+                }
+            }
         }
 
 
@@ -24,9 +42,8 @@ int main()
         // DRAW
         window.clear();
 
-
-        window.draw(shape);
-
+        // Draw everything
+        window.draw(playerSprite);
 
         window.display();
     }
