@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 int main()
 {
@@ -34,6 +35,19 @@ int main()
     textRect = titleText.getLocalBounds();
     titleText.setOrigin(textRect.left + textRect.width / 2, textRect.top + textRect.height / 2);
 
+    // Load SoundBuffer from file
+    sf::SoundBuffer jumpSoundBuffer;
+    jumpSoundBuffer.loadFromFile("Assets/Audio/Jump.wav");
+
+    // Play sound using Sound type
+    sf::Sound jumpSound;
+    jumpSound.setBuffer(jumpSoundBuffer);
+    jumpSound.play();
+
+    // Load and play music
+    sf::Music gameMusic;
+    gameMusic.openFromFile("Assets/Audio/Music.ogg");
+    gameMusic.play();
 
     while (window.isOpen())
     {
