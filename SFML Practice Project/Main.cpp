@@ -13,6 +13,14 @@ int main()
     // Setup Sprite
     sf::Sprite playerSprite;
     playerSprite.setTexture(playerTexture);
+    sf::Vector2f playerPosition = sf::Vector2f(0.0f, 0.0f);
+
+    // Velocity / Speed
+    sf::Vector2f playerVelocity = sf::Vector2f(0.0f, 0.0f);
+    float speed = 100.0f;
+    float accelerationRate = 1000.0f;
+    float drag = 0.01f; // percentage of velocity to remove each frame
+    sf::Vector2f playerAcceleration = sf::Vector2f(0.0f, 0.0f);
 
     // Load font
     sf::Font mainFont;
@@ -42,15 +50,21 @@ int main()
     // Play sound using Sound type
     sf::Sound jumpSound;
     jumpSound.setBuffer(jumpSoundBuffer);
-    jumpSound.play();
+    //jumpSound.play();
 
     // Load and play music
     sf::Music gameMusic;
     gameMusic.openFromFile("Assets/Audio/Music.ogg");
-    gameMusic.play();
+    //gameMusic.play();
+
+    // Game clock
+    sf::Clock gameClock;
 
     while (window.isOpen())
     {
+        sf::Time gameTime = gameClock.restart();
+        float deltaTime = gameTime.asSeconds();
+
         // INPUT
         sf::Event event;
         while (window.pollEvent(event))
@@ -70,16 +84,36 @@ int main()
             }
         }
 
+        playerAcceleration.x = 0.0f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        {
+            // left key is pressed: move our character
+            playerAcceleration.x = -accelerationRate;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            // left key is pressed: move our character
+            playerAcceleration.x = accelerationRate;
+        }
 
         // LOGIC / PROCESS / UPDATE
+        sf::Vector2f deltaVelocity = playerAcceleration * deltaTime;
+        playerVelocity = playerVelocity + deltaVelocity;
 
+        // Change in velocity due to drag
+        playerVelocity.x = playerVelocity.x - playerVelocity.x * drag;
+
+        sf::Vector2f deltaPosition = playerVelocity * deltaTime;
+        playerPosition = playerPosition + deltaPosition;
+
+        playerSprite.setPosition(playerPosition);
 
 
         // DRAW
         window.clear();
 
         // Draw everything
-        window.draw(titleText);
+        //window.draw(titleText);
         window.draw(playerSprite);
 
         window.display();
