@@ -15,12 +15,45 @@ int main()
     playerSprite.setTexture(playerTexture);
     sf::Vector2f playerPosition = sf::Vector2f(0.0f, 0.0f);
 
+
+    // Setup Sprite
+    sf::Sprite enemySprite;
+    enemySprite.setTexture(playerTexture);
+    enemySprite.setColor(sf::Color::Red);
+    sf::Vector2f enemyPosition = sf::Vector2f(500.0f, 500.0f);
+    enemySprite.setPosition(enemyPosition);
+
+    sf::Vector2f playerSpriteSize;
+    playerSpriteSize.x = playerTexture.getSize().x;
+    playerSpriteSize.y = playerTexture.getSize().y;
+
+    // Bounding circles
+    float playerCircleRadius = playerTexture.getSize().x / 2;
+    sf::Vector2f playerCircleCentre = playerPosition + 0.5f * playerSpriteSize;
+    sf::CircleShape playerCircle;
+    playerCircle.setRadius(playerCircleRadius);
+    playerCircle.setPosition(playerPosition);
+    playerCircle.setFillColor(sf::Color::Green);
+
+
+    float enemyCircleRadius = playerTexture.getSize().x / 2;
+    sf::Vector2f enemyCircleCentre = enemyPosition + 0.5f * playerSpriteSize;
+    sf::CircleShape enemyCircle;
+    enemyCircle.setRadius(enemyCircleRadius);
+    enemyCircle.setPosition(enemyPosition);
+    enemyCircle.setFillColor(sf::Color::Green);
+
+
+
     // Velocity / Speed
     sf::Vector2f playerVelocity = sf::Vector2f(0.0f, 0.0f);
     float speed = 100.0f;
     float accelerationRate = 1000.0f;
     float drag = 0.01f; // percentage of velocity to remove each frame
+    float jumpSpeed = 100.0f;
+    float gravity = 500.0f;
     sf::Vector2f playerAcceleration = sf::Vector2f(0.0f, 0.0f);
+    playerAcceleration.y = gravity;
 
     // Load font
     sf::Font mainFont;
@@ -95,6 +128,11 @@ int main()
             // left key is pressed: move our character
             playerAcceleration.x = accelerationRate;
         }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            // jump!
+            playerVelocity.y = -jumpSpeed;
+        }
 
         // LOGIC / PROCESS / UPDATE
         sf::Vector2f deltaVelocity = playerAcceleration * deltaTime;
@@ -108,6 +146,30 @@ int main()
 
         playerSprite.setPosition(playerPosition);
 
+        // Update collision geometry
+        playerCircleCentre = playerPosition + 0.5f*playerSpriteSize;
+        playerCircle.setPosition(playerPosition);
+
+
+        // Check for collision
+        sf::Vector2f circleDisplacement = playerCircleCentre - enemyCircleCentre;
+        float squareDistance =    circleDisplacement.x * circleDisplacement.x
+                                + circleDisplacement.y * circleDisplacement.y;
+
+        float squareRadii = (playerCircleRadius + enemyCircleRadius) * (playerCircleRadius + enemyCircleRadius);
+        bool colliding = squareDistance < squareRadii;
+
+        if (colliding)
+        {
+            playerCircle.setFillColor(sf::Color::Red);
+            enemyCircle.setFillColor(sf::Color::Red);
+        }
+        else
+        {
+            playerCircle.setFillColor(sf::Color::Green);
+            enemyCircle.setFillColor(sf::Color::Green);
+        }
+
 
         // DRAW
         window.clear();
@@ -115,6 +177,8 @@ int main()
         // Draw everything
         //window.draw(titleText);
         window.draw(playerSprite);
+        window.draw(playerCircle);
+        window.draw(enemyCircle);
 
         window.display();
     }
