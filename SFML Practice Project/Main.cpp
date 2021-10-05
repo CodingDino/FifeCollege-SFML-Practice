@@ -23,13 +23,13 @@ int main()
     sf::Vector2f enemyPosition = sf::Vector2f(500.0f, 500.0f);
     enemySprite.setPosition(enemyPosition);
 
-    sf::Vector2f playerSpriteSize;
-    playerSpriteSize.x = playerTexture.getSize().x;
-    playerSpriteSize.y = playerTexture.getSize().y;
+    sf::Vector2f spriteSize;
+    spriteSize.x = playerTexture.getSize().x;
+    spriteSize.y = playerTexture.getSize().y;
 
     // Bounding circles
     float playerCircleRadius = playerTexture.getSize().x / 2;
-    sf::Vector2f playerCircleCentre = playerPosition + 0.5f * playerSpriteSize;
+    sf::Vector2f playerCircleCentre = playerPosition + 0.5f * spriteSize;
     sf::CircleShape playerCircle;
     playerCircle.setRadius(playerCircleRadius);
     playerCircle.setPosition(playerPosition);
@@ -37,18 +37,28 @@ int main()
 
 
     float enemyCircleRadius = playerTexture.getSize().x / 2;
-    sf::Vector2f enemyCircleCentre = enemyPosition + 0.5f * playerSpriteSize;
+    sf::Vector2f enemyCircleCentre = enemyPosition + 0.5f * spriteSize;
     sf::CircleShape enemyCircle;
     enemyCircle.setRadius(enemyCircleRadius);
     enemyCircle.setPosition(enemyPosition);
     enemyCircle.setFillColor(sf::Color::Green);
 
+    // Bounding Boxes
+    sf::Vector2f playerBoundsOffset(3,0);
+    sf::Vector2f playerBoundsScale(0.75f, 1);
 
+    sf::Vector2f enemyBoundsOffset(-7, -7);
+    sf::Vector2f enemyBoundsScale(1.5f, 1.5f);
+
+    // Visual part of bounding boxes
+    // No need to set these up as they are updated each frame
+    sf::RectangleShape playerAABBDisplay;
+    sf::RectangleShape enemyAABBDisplay;
 
     // Velocity / Speed
     sf::Vector2f playerVelocity = sf::Vector2f(0.0f, 0.0f);
-    float speed = 100.0f;
-    float accelerationRate = 1000.0f;
+    float speed = 500.0f;
+    float accelerationRate = 2000.0f;
     float drag = 0.01f; // percentage of velocity to remove each frame
     float jumpSpeed = 100.0f;
     float gravity = 500.0f;
@@ -147,27 +157,62 @@ int main()
         playerSprite.setPosition(playerPosition);
 
         // Update collision geometry
-        playerCircleCentre = playerPosition + 0.5f*playerSpriteSize;
+        playerCircleCentre = playerPosition + 0.5f * spriteSize;
+
+        // Get current position and size from sprites
+        sf::FloatRect playerAABB = playerSprite.getGlobalBounds();
+        sf::FloatRect enemyAABB = enemySprite.getGlobalBounds();
+
+        // Update this geometry using our custom offsets and scales
+        playerAABB.left += playerBoundsOffset.x;
+        playerAABB.top += playerBoundsOffset.y;
+        playerAABB.width *= playerBoundsScale.x;
+        playerAABB.height *= playerBoundsScale.y;
+
+        enemyAABB.left += enemyBoundsOffset.x;
+        enemyAABB.top += enemyBoundsOffset.y;
+        enemyAABB.width *= enemyBoundsScale.x;
+        enemyAABB.height *= enemyBoundsScale.y;
+
+        // Update collision visuals
         playerCircle.setPosition(playerPosition);
 
+        playerAABBDisplay.setPosition(playerAABB.left, playerAABB.top);
+        enemyAABBDisplay.setPosition(enemyAABB.left, enemyAABB.top);
+
+        playerAABBDisplay.setSize(sf::Vector2f(playerAABB.width, playerAABB.height));
+        enemyAABBDisplay.setSize(sf::Vector2f(enemyAABB.width, enemyAABB.height));
 
         // Check for collision
-        sf::Vector2f circleDisplacement = playerCircleCentre - enemyCircleCentre;
-        float squareDistance =    circleDisplacement.x * circleDisplacement.x
-                                + circleDisplacement.y * circleDisplacement.y;
-
-        float squareRadii = (playerCircleRadius + enemyCircleRadius) * (playerCircleRadius + enemyCircleRadius);
-        bool colliding = squareDistance < squareRadii;
+        //sf::Vector2f circleDisplacement = playerCircleCentre - enemyCircleCentre;
+        //float squareDistance =    circleDisplacement.x * circleDisplacement.x
+        //                        + circleDisplacement.y * circleDisplacement.y;
+        //
+        //float squareRadii = (playerCircleRadius + enemyCircleRadius) * (playerCircleRadius + enemyCircleRadius);
+        //bool colliding = squareDistance < squareRadii;
+        bool colliding = playerAABB.intersects(enemyAABB);
 
         if (colliding)
         {
-            playerCircle.setFillColor(sf::Color::Red);
-            enemyCircle.setFillColor(sf::Color::Red);
+            sf::Color fillcolor = sf::Color::Red;
+            fillcolor.a = 125;
+
+            playerCircle.setFillColor(fillcolor);
+            enemyCircle.setFillColor(fillcolor);
+
+            playerAABBDisplay.setFillColor(fillcolor);
+            enemyAABBDisplay.setFillColor(fillcolor);
         }
         else
         {
-            playerCircle.setFillColor(sf::Color::Green);
-            enemyCircle.setFillColor(sf::Color::Green);
+            sf::Color fillcolor = sf::Color::Green;
+            fillcolor.a = 125;
+
+            playerCircle.setFillColor(fillcolor);
+            enemyCircle.setFillColor(fillcolor);
+
+            playerAABBDisplay.setFillColor(fillcolor);
+            enemyAABBDisplay.setFillColor(fillcolor);
         }
 
 
@@ -177,8 +222,11 @@ int main()
         // Draw everything
         //window.draw(titleText);
         window.draw(playerSprite);
-        window.draw(playerCircle);
-        window.draw(enemyCircle);
+        window.draw(enemySprite);
+        //window.draw(playerCircle);
+        //window.draw(enemyCircle);
+        window.draw(playerAABBDisplay);
+        window.draw(enemyAABBDisplay);
 
         window.display();
     }
