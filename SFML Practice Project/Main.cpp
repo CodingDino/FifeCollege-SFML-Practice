@@ -206,9 +206,42 @@ int main()
             playerAABBDisplay.setFillColor(fillcolor);
             enemyAABBDisplay.setFillColor(fillcolor);
 
-            // Return player to previous position
-            playerPosition = playerPositionPrev;
-            playerVelocity = sf::Vector2f(0,0);
+            // Collision Depth
+            sf::Vector2f AWidthHeight = sf::Vector2f(playerAABB.width, playerAABB.height);
+            sf::Vector2f BWidthHeight = sf::Vector2f(enemyAABB.width, enemyAABB.height);
+
+            sf::Vector2f ACentre = sf::Vector2f(playerAABB.left, playerAABB.top); 
+            ACentre += 0.5f * AWidthHeight;
+            sf::Vector2f BCentre = sf::Vector2f(enemyAABB.left, enemyAABB.top);
+            BCentre += 0.5f * BWidthHeight;
+
+            sf::Vector2f distance = BCentre - ACentre;
+            sf::Vector2f minDistance = 0.5f * AWidthHeight + 0.5f * BWidthHeight;
+            if (distance.x < 0)
+                minDistance.x = -minDistance.x;
+            if (distance.y < 0)
+                minDistance.y = -minDistance.y;
+
+            sf::Vector2f depth = minDistance - distance;
+            sf::Vector2f absDepth = sf::Vector2f(abs(depth.x), abs(depth.y));
+
+            if (absDepth.x < absDepth.y)
+            {
+                // Move along x direction
+                playerPosition.x -= depth.x;
+
+                // Stop movement in x direction
+                playerVelocity.x = 0;
+            }
+            else
+            {
+                // Move along y direction
+                playerPosition.y -= depth.y;
+
+                // Stop movement in y direction
+                playerVelocity.y = 0;
+            }
+            playerSprite.setPosition(playerPosition);
         }
         else
         {
