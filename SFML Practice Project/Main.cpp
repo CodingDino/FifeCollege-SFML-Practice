@@ -14,13 +14,14 @@ int main()
     sf::Sprite playerSprite;
     playerSprite.setTexture(playerTexture);
     sf::Vector2f playerPosition = sf::Vector2f(0.0f, 0.0f);
-
+    sf::Vector2f playerPositionPrev = playerPosition;
 
     // Setup Sprite
     sf::Sprite enemySprite;
     enemySprite.setTexture(playerTexture);
     enemySprite.setColor(sf::Color::Red);
-    sf::Vector2f enemyPosition = sf::Vector2f(500.0f, 500.0f);
+    sf::Vector2f enemyPosition = sf::Vector2f(50.0f, 500.0f);
+    sf::Vector2f enemyPositionPrev = enemyPosition;
     enemySprite.setPosition(enemyPosition);
 
     sf::Vector2f spriteSize;
@@ -151,6 +152,8 @@ int main()
         // Change in velocity due to drag
         playerVelocity.x = playerVelocity.x - playerVelocity.x * drag;
 
+        // Before changing position, record previous position
+        playerPositionPrev = playerPosition;
         sf::Vector2f deltaPosition = playerVelocity * deltaTime;
         playerPosition = playerPosition + deltaPosition;
 
@@ -202,6 +205,10 @@ int main()
 
             playerAABBDisplay.setFillColor(fillcolor);
             enemyAABBDisplay.setFillColor(fillcolor);
+
+            // Return player to previous position
+            playerPosition = playerPositionPrev;
+            playerVelocity = sf::Vector2f(0,0);
         }
         else
         {
